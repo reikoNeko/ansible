@@ -1,0 +1,24 @@
+---
+- name: Remove SELinus on CentOS/EPEL systems
+  hosts: all
+  sudo: True
+
+  tasks:
+  - name: Update Current Packages
+    yum: name=* state=latest
+
+  - name: Install Python bindings for SELinux
+    yum: name="libselinux-python" state=present update_cache=no
+
+  - name: Turn off SELinux
+    command: setenforce 0
+    
+  - name: o Disable config file
+    lineinfile: dest=/etc/selinux/config state=present regexp="SELINUX=" line="SELINUX=disabled"
+
+  - name: o Remove SELinux packages
+    yum: name="selinux-policy,selinux-policy-targeted,libselinux-python" state=absent update_cache=no
+
+  - name: Disable restorecond
+    service: name=restorecond state=stopped enabled=no
+
